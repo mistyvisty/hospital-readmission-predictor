@@ -1,6 +1,6 @@
 # 🏥 Hospital Readmission Risk Predictor
 
-End-to-end ML pipeline predicting 30-day hospital readmission risk for diabetic patients, with a production-style serving layer and automated CI/CD.
+End-to-end ML pipeline predicting 30-day hospital readmission risk for diabetic patients, with a production-style serving layer, monitoring, and automated CI/CD.
 
 ## 🎯 Problem
 
@@ -8,14 +8,14 @@ Hospitals are penalized financially for high readmission rates. Identifying whic
 
 ## ⚙️ Pipeline
 
-Raw CSV (101,766 rows) → Remove death/hospice discharges (data leakage prevention) → Feature engineering (age bucketing, medication flags) → SMOTE (inside ImbPipeline — no leakage across folds) → XGBoost + 5-fold Stratified Cross-Validation → Precision-recall threshold tuning → SHAP explainability → FastAPI serving layer → Docker container → GitHub Actions CI/CD
+Raw CSV (101,766 rows) → Remove death/hospice discharges (data leakage prevention) → Feature engineering (age bucketing, medication flags) → SMOTE (inside ImbPipeline — no leakage across folds) → XGBoost + 5-fold Stratified Cross-Validation → Precision-recall threshold tuning → SHAP explainability → FastAPI serving layer → Prometheus metrics + Evidently drift detection → Docker + Prometheus + Grafana → GitHub Actions CI/CD
 
 ## 📊 Results & Honest Context
 
 - **Mean CV AUC: 0.581** | **Test AUC: 0.582**
 - Tuned threshold: 0.252 (optimized for recall, given the clinical cost of missing a true readmission)
 
-This AUC may look modest compared to other healthcare ML problems — and that's expected, not a flaw. Published peer-reviewed research on this exact dataset reports XGBoost achieving **AUC 0.667**, with logistic regression at 0.642 ([Source](https://pubmed.ncbi.nlm.nih.gov/40385730/)). Hospital readmission is a genuinely hard, weakly-separable prediction problem — patient outcomes depend on many factors not captured in structured EHR data (social determinants, post-discharge adherence, etc.). This project intentionally reports honest, reproducible numbers rather than chasing an inflated metric.
+This AUC may look modest — and that's expected, not a flaw. Published peer-reviewed research on this exact dataset reports XGBoost achieving **AUC 0.667**, with logistic regression at 0.642 ([Source](https://pubmed.ncbi.nlm.nih.gov/40385730/)). Hospital readmission is a genuinely hard, weakly-separable prediction problem. This project intentionally reports honest, reproducible numbers rather than chasing an inflated metric.
 
 ## 🔍 Top Predictors (via SHAP)
 
@@ -25,9 +25,22 @@ This AUC may look modest compared to other healthcare ML problems — and that's
 4. Abnormal A1C result
 5. Number of procedures
 
+## 📡 Monitoring
+
+Once deployed, the API exposes:
+
+| Endpoint | Description |
+|---|---|
+| `/predict` | Returns readmission probability |
+| `/health` | API health + prediction count |
+| `/metrics` | Prometheus-compatible metrics |
+| `/drift-report` | Evidently HTML drift report vs reference data |
+
+Prometheus scrapes `/metrics` every 15 seconds. Grafana visualizes prediction volume, latency, and drift detection over time.
+
 ## 🛠️ Tech Stack
 
-`Python` `XGBoost` `imbalanced-learn (SMOTE)` `SHAP` `FastAPI` `Docker` `GitHub Actions`
+`Python` `XGBoost` `imbalanced-learn (SMOTE)` `SHAP` `FastAPI` `Evidently` `Prometheus` `Grafana` `Docker` `GitHub Actions`
 
 ## 🚀 Running Locally
 
@@ -46,14 +59,26 @@ docker build -t readmission-predictor .
 docker run -p 8000:8000 readmission-predictor
 ```
 
+Start Prometheus + Grafana alongside the API:
+
+```bash
+cd monitoring
+docker-compose up -d
+```
+
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000` (admin/admin)
+
 ## ✅ CI/CD
 
 Every push to `main` triggers GitHub Actions to install dependencies, generate test data, retrain the model, and run the automated test suite — ensuring the model and API stay in sync.
 
 ## 📁 Project Structure
 
-- `app/` — FastAPI application (`main.py`, `predict.py`, `schemas.py`)
+- `app/` — FastAPI application (`main.py`, `predict.py`, `schemas.py`, `reference_data.csv`)
 - `notebooks/train_model.py` — training pipeline
+- `monitoring/` — `prometheus.yml` and `docker-compose.yml`
+- `scripts/check_drift.py` — standalone drift check script
 - `tests/test_api.py` — API test suite
 - `Dockerfile`
 - `.github/workflows/ci.yml`
