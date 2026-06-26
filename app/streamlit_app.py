@@ -53,7 +53,7 @@ if submitted:
 
     with st.spinner("Predicting..."):
         try:
-            response = requests.post("http://localhost:8000/predict", json=payload)
+            response = requests.post("https://hospital-readmission-api-irii.onrender.com/predict", json=payload)
             result = response.json()
 
             prob = result["probability"]
@@ -71,4 +71,4 @@ if submitted:
             st.metric("Predicted Readmission", label, f"{prob:.1%}")
 
         except Exception as e:
-            st.error(f"Could not connect to API. Make sure uvicorn is running.\n\n{e}")
+            st.error(f"Could not connect to API. Error: {e}")
