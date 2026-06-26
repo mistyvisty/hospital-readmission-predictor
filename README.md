@@ -36,7 +36,7 @@ Once deployed, the API exposes:
 Prometheus scrapes `/metrics` every 15 seconds. Grafana visualizes prediction volume, latency, and drift detection over time.
 
 ## 🛠️ Tech Stack
-`Python` `XGBoost` `imbalanced-learn (SMOTE)` `SHAP` `FastAPI` `Streamlit` `Evidently` `Prometheus` `Grafana` `Docker` `GitHub Actions`
+`Python` `XGBoost` `imbalanced-learn (SMOTE)` `SHAP` `FastAPI` `Streamlit` `Evidently` `Prometheus` `Grafana` `🐳 Docker` `GitHub Actions`
 
 ## 🚀 Running Locally
 ```bash
@@ -56,6 +56,19 @@ Then in a second terminal:
 streamlit run app/streamlit_app.py
 ```
 Or just use the **[Live App](https://hospital-readmission-bz7hqjeye7fgsppfs3pwqm.streamlit.app)** — no setup needed.
+
+## 🐳 Running with Docker
+```bash
+docker build -t readmission-predictor .
+docker run -p 8000:8000 readmission-predictor
+```
+Start Prometheus + Grafana alongside the API:
+```bash
+cd monitoring
+docker-compose up -d
+```
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000` (admin/admin)
 
 ## ✅ CI/CD
 Every push to `main` triggers GitHub Actions to install dependencies, generate test data, retrain the model, and run the automated test suite — ensuring the model and API stay in sync.
