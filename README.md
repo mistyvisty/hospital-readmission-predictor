@@ -1,6 +1,6 @@
 # 🏥 Hospital Readmission Risk Predictor
 
-End-to-end ML pipeline predicting 30-day hospital readmission risk for diabetic patients, with a production-style serving layer, monitoring, and automated CI/CD.
+End-to-end ML pipeline predicting 30-day hospital readmission risk for diabetic patients, with a production-style serving layer, monitoring, Streamlit UI, and automated CI/CD.
 
 ## 🎯 Problem
 
@@ -8,7 +8,7 @@ Hospitals are penalized financially for high readmission rates. Identifying whic
 
 ## ⚙️ Pipeline
 
-Raw CSV (101,766 rows) → Remove death/hospice discharges (data leakage prevention) → Feature engineering (age bucketing, medication flags) → SMOTE (inside ImbPipeline — no leakage across folds) → XGBoost + 5-fold Stratified Cross-Validation → Precision-recall threshold tuning → SHAP explainability → FastAPI serving layer → Prometheus metrics + Evidently drift detection → Docker + Prometheus + Grafana → GitHub Actions CI/CD
+Raw CSV (101,766 rows) → Remove death/hospice discharges (data leakage prevention) → Feature engineering (age bucketing, medication flags) → SMOTE (inside ImbPipeline — no leakage across folds) → XGBoost + 5-fold Stratified Cross-Validation → Precision-recall threshold tuning → SHAP explainability → FastAPI serving layer → Streamlit UI → Prometheus metrics + Evidently drift detection → Docker + Prometheus + Grafana → GitHub Actions CI/CD
 
 ## 📊 Results & Honest Context
 
@@ -40,7 +40,7 @@ Prometheus scrapes `/metrics` every 15 seconds. Grafana visualizes prediction vo
 
 ## 🛠️ Tech Stack
 
-`Python` `XGBoost` `imbalanced-learn (SMOTE)` `SHAP` `FastAPI` `Evidently` `Prometheus` `Grafana` `Docker` `GitHub Actions`
+`Python` `XGBoost` `imbalanced-learn (SMOTE)` `SHAP` `FastAPI` `Streamlit` `Evidently` `Prometheus` `Grafana` `Docker` `GitHub Actions`
 
 ## 🚀 Running Locally
 
@@ -51,6 +51,24 @@ uvicorn app.main:app --reload
 ```
 
 Visit `http://127.0.0.1:8000/docs` for interactive API testing.
+
+## 🖥️ Streamlit UI
+
+A user-friendly web interface for interacting with the model without touching the API directly.
+
+Run the API first:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Then in a second terminal:
+
+```bash
+streamlit run app/streamlit_app.py
+```
+
+Visit `http://localhost:8501` — fill in patient details and get instant risk prediction with color-coded result (🟢 Low / 🟡 Medium / 🔴 High).
 
 ## 🐳 Running with Docker
 
@@ -76,6 +94,7 @@ Every push to `main` triggers GitHub Actions to install dependencies, generate t
 ## 📁 Project Structure
 
 - `app/` — FastAPI application (`main.py`, `predict.py`, `schemas.py`, `reference_data.csv`)
+- `app/streamlit_app.py` — Streamlit web UI
 - `notebooks/train_model.py` — training pipeline
 - `monitoring/` — `prometheus.yml` and `docker-compose.yml`
 - `scripts/check_drift.py` — standalone drift check script
