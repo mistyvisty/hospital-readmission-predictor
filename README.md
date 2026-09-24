@@ -7,7 +7,7 @@
 ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat-square&logo=prometheus&logoColor=white)
 ![CI](https://github.com/mistyvisty/hospital-readmission-predictor/actions/workflows/ci.yml/badge.svg)
 
-🚀 **Live App:** [Try it here](https://hospital-readmission-bz7hqjeye7fgsppfs3pwqm.streamlit.app) *(free tier — the app and API may take ~30–60s to wake up)*
+🚀 **Live App:** [Try it here](https://hospital-readmission-bz7hqjeye7fgsppfs3pwqm.streamlit.app) *(the app and API may take ~30–60s to wake up)*
 
 End-to-end ML system predicting **30-day hospital readmission risk** for diabetic patients: model training, FastAPI serving, drift detection, Prometheus metrics, Docker, and CI/CD, going past `model.predict()` to what it takes to run a model in production.
 
